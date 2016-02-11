@@ -2,10 +2,25 @@
 (function () {
 
     /* ---------------------------------- Local Variables ---------------------------------- */
+    HomeView.prototype.template = Handlebars.compile($("#home-tpl").html());
+    EmployeeListView.prototype.template =
+            Handlebars.compile($("#employee-list-tpl").html());
+    EmployeeView.prototype.template = Handlebars.compile($("#employee-tpl").html());
     var service = new EmployeeService();
     service.initialize().done(function () {
-        renderHomeView();
-    });
+
+      router.addRoute('', function() {
+      $('body').html(new HomeView(service).render().$el);
+  });
+
+  router.addRoute('employees/:id', function(id) {
+      service.findById(parseInt(id)).done(function(employee) {
+          $('body').html(new EmployeeView(employee).render().$el);
+      });
+  });
+
+  router.start();
+});
 
     /* --------------------------------- Event Registration -------------------------------- */
 
@@ -24,25 +39,7 @@
 }, false);
 
     /* ---------------------------------- Local Functions ---------------------------------- */
-    function findByName() {
-        service.findByName($('.search-key').val()).done(function (employees) {
-            var l = employees.length;
-            var e;
-            $('.employee-list').empty();
-            for (var i = 0; i < l; i++) {
-                e = employees[i];
-                $('.employee-list').append('<li><a href="#employees/' + e.id + '">' + e.firstName + ' ' + e.lastName + '</a></li>');
-            }
-        });
-    }
 
-    function renderHomeView() {
-      var html =
-        "<h1>Directory</h1>" +
-          "<input class='search-key' type='search' placeholder='Enter name'/>" +
-          "<ul class='employee-list'></ul>";
-      $('body').html(html);
-      $('.search-key').on('keyup', findByName);
-    }
+
 
 }());
